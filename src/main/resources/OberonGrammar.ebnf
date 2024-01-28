@@ -1,0 +1,140 @@
+program = "MODULE" ident ";" [ importSection ] { declaration } [ "BEGIN" { statement ";" } ] "END" ident "." $ ;
+
+importSection
+    = { "IMPORT" importList ";" }
+    ;
+
+importList
+    = ident { "," ident }
+    ;
+
+declaration
+    = varDeclaration
+    | arrayDeclaration
+    | functionOrProcedure
+    ;
+
+varDeclaration
+    = "VAR" identList ":" type ";"
+    ;
+
+arrayDeclaration
+    = "VAR" identList ":" "ARRAY" "[" number "]" { "OF" "ARRAY" "[" number "]" } "OF" type ";"
+    ;
+
+identList
+    = ident { "," ident }
+    ;
+
+functionOrProcedure
+    = procedureDeclaration
+    | functionDeclaration
+    ;
+
+procedureDeclaration
+    = "PROCEDURE" ident [ "(" [ parameterList ] ")" ] ";" { procedureStatement ";" } "END" ident ";"
+    ;
+
+functionDeclaration
+    = "FUNCTION" ident [ "(" [ parameterList ] ")" ] ":" type ";" { procedureStatement ";" } "END" ident ";"
+    ;
+
+parameterList
+    = parameterDecl { ";" parameterDecl }
+    ;
+
+parameterDecl
+    = [ "VAR" ] identList ":" type
+    | [ "VAR" ] identList ":" "ARRAY" "[" number "]" "OF" type
+    ;
+
+procedureStatement
+    = assignment
+    | procedureCall
+    | conditional
+    | whileLoop
+    | forLoop
+    | repeatLoop
+    | returnStatement
+    ;
+
+statement
+    = assignment
+    | procedureCall
+    | conditional
+    | whileLoop
+    | forLoop
+    | repeatLoop
+    | returnStatement
+    ;
+
+assignment
+    = ident ":=" expression
+    | ident "[" expression "]" ":=" expression
+    ;
+
+procedureCall
+    = qualifiedIdent [ "(" [ argumentList ] ")" ] ";"
+    ;
+
+qualifiedIdent
+    = ident { "." ident }
+    ;
+
+argumentList
+    = argument { "," argument }
+    ;
+
+argument
+    = expression | string
+    ;
+
+returnStatement
+    = "RETURN" expression
+    ;
+
+expression
+    = simpleExpression [ relation simpleExpression ] | string
+    ;
+
+simpleExpression
+    = [ "+" | "-" ] term { ( "+" | "-" ) term }
+    ;
+
+term
+    = factor { ( "*" | "/" ) factor }
+    ;
+
+factor
+    = qualifiedIdent
+    | number
+    | "(" expression ")"
+    | string
+    | ident "[" expression "]"
+    ;
+
+conditional
+    = "IF" expression "THEN" { procedureStatement ";" } [ "ELSE" { procedureStatement ";" } ] "END"
+    ;
+
+whileLoop
+    = "WHILE" expression "DO" { procedureStatement ";" } "END"
+    ;
+
+forLoop
+    = "FOR" assignment "TO" expression "DO" { procedureStatement ";" } "END"
+    ;
+
+repeatLoop
+    = "REPEAT" { procedureStatement ";" } "UNTIL" expression
+    ;
+
+relation
+    = "=" | "#" | "<" | "<=" | ">" | ">="
+    ;
+
+ident = /[a-zA-Z_][a-zA-Z0-9_]*/ ;
+number = /[0-9]+/ ;
+string = /"[^"]*"/ ;
+type = "INTEGER" | "REAL" | "BOOLEAN" | "STRING" ;
+
